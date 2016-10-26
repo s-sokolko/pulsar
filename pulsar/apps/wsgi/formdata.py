@@ -88,9 +88,9 @@ class HttpBodyReader:
         """
         self.can_continue()
         try:
-            line = await self.reader.readuntil(b'\n')
+            line = self.reader.readuntil(b'\n')
         except asyncio.streams.LimitOverrunError as e:
-            line = await self.reader.read(self.limit)
+            line = self.reader.read(self.limit)
         return line
 
 
