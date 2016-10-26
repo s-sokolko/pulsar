@@ -81,17 +81,9 @@ class HttpBodyReader:
     def limit(self):
         return self.reader._limit
 
-    def readline_safe(self):
-        """
-        Reads until newline or _limit bytes if no newline found so far
-        :return: line
-        """
+    def readuntil(self, separator):
         self.can_continue()
-        try:
-            line = self.reader.readuntil(b'\n')
-        except asyncio.streams.LimitOverrunError as e:
-            line = self.reader.read(self.limit)
-        return line
+        return self.reader.readuntil(separator)
 
 
 def parse_form_data(environ, stream=None, **kw):
@@ -197,7 +189,10 @@ class MultipartDecoder(FormDecoder):
                     current = None
 
             while 1:
-                line = await fp.readline_safe()
+                try:
+                    line = await fp.readuntil(b'\n')
+                except asyncio.streams.LimitOverrunError as e:
+                    line = await fp.read(fp.limit)
                 line = line or lastpart
                 if line.startswith(sep):
                     terminator = line.rstrip()
