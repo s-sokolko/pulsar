@@ -1019,6 +1019,9 @@ class HttpParser:
         return len(rest)
 
     def _parse_body(self):
+        if self._clen_rest <= 0:  # return "Already parsed" for empty response
+            return 0
+
         data = b''.join(self._buf)
         #
         if not self._chunked:
