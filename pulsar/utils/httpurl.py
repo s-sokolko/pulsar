@@ -1019,7 +1019,8 @@ class HttpParser:
         return len(rest)
 
     def _parse_body(self):
-        if self._clen_rest <= 0:  # return "Already parsed" for empty response
+        # return "Already parsed" for empty response on HEAD method
+        if not self._clen_rest and self._method.upper() == 'HEAD':
             return 0
 
         data = b''.join(self._buf)
