@@ -191,7 +191,7 @@ class MultipartDecoder(FormDecoder):
             while 1:
                 try:
                     line = await fp.readline()
-                except asyncio.streams.LimitOverrunError as e:
+                except (asyncio.streams.LimitOverrunError, ValueError) as e:
                     line = await fp.read(fp.limit)
                 line = line or lastpart
                 if line.startswith(sep):
