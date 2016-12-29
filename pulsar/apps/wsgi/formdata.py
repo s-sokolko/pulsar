@@ -190,7 +190,7 @@ class MultipartDecoder(FormDecoder):
 
             while 1:
                 try:
-                    line = await fp.readline()
+                    line = await fp.readuntil(b'\n')
                 except (asyncio.streams.LimitOverrunError, ValueError) as e:
                     line = await fp.read(fp.limit)
                 line = line or lastpart
