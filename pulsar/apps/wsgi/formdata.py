@@ -392,6 +392,9 @@ class BytesProducer:
     async def read(self):
         return self.bytes.read()
 
+    async def readuntil(self, separator):
+        return self.bytes.readline()
+
     def __call__(self, consumer, *args):
         value = None
         coro = consumer(self, *args)
