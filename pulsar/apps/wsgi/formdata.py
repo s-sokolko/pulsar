@@ -177,7 +177,7 @@ class MultipartDecoder(FormDecoder):
                 data = await fp.read(nbytes) if nbytes > 0 else b''
 
                 if current.name:
-                    current.feed_data(data)
+                    await current.feed_data(data)
                 else:
                     current = None
 
@@ -188,11 +188,11 @@ class MultipartDecoder(FormDecoder):
                     if terminator in (nextpart, lastpart):
                         break
                 if current:
-                    current.feed_data(line)
+                    await current.feed_data(line)
 
             # Done with part.
             if current:
-                current.done()
+                await current.done()
 
         self.environ['wsgi.input'] = BytesIO(self.buffer)
         return self.result
@@ -304,11 +304,11 @@ class MultipartPart:
     def complete(self):
         return self._done
 
-    def feed_data(self, data):
+    async def feed_data(self, data):
         if data:
             self._bytes.append(data)
             if self.parser.stream:
-                self.parser.stream(self)
+                await self.parser.stream(self)
             else:
                 self.parser.buffer.extend(data)
 
@@ -324,7 +324,7 @@ class MultipartPart:
     def is_file(self):
         return self.filename or self.content_type not in (None, 'text/plain')
 
-    def done(self):
+    async def done(self):
         if not self._done:
 
             if self._bytes and self.length < 0:
@@ -338,7 +338,7 @@ class MultipartPart:
 
             self._done = True
             if self.parser.stream:
-                self.parser.stream(self)
+                await self.parser.stream(self)
 
             if self.is_file():
                 self.parser.result[1][self.name] = self
